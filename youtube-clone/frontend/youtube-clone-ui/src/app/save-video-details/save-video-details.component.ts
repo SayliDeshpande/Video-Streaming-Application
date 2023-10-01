@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
+import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { VideoService } from "../video.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ActivatedRoute } from "@angular/router";
+import { VideoDto } from '../video-dto';
 
 
 @Component({
@@ -14,27 +15,24 @@ import { ActivatedRoute } from "@angular/router";
 })
 export class SaveVideoDetailsComponent {
 
-
-	edit(_t56: String, $event: MatChipEditedEvent) {
-		throw new Error('Method not implemented.');
-	}
-
+	
 	saveVideoDetailsForm: FormGroup;
 	title: FormControl = new FormControl('');
 	description: FormControl = new FormControl('');
 	videoStatus: FormControl = new FormControl('');
-
+	selectable = true;
+  	removable = true;
 
 	addOnBlur = true;
 	readonly separatorKeysCodes = [ENTER, COMMA] as const;
-	tags: String[] = [];
+	tags: string[] = [];
 	selectedFile!: File;
 	selectedFileName = '';
 	fileSelected = false;
 	videoId = '';
 	videoUrl!: string;
 	thumbnailUrl!: string;
-
+	
 
 	constructor(private activatedRoute: ActivatedRoute, private videoService: VideoService,
 		private matSnackBar: MatSnackBar) {
@@ -52,8 +50,6 @@ export class SaveVideoDetailsComponent {
 
 	}
 
-	//announcer = inject(LiveAnnouncer);
-
 	add(event: MatChipInputEvent): void {
 		const value = (event.value || '').trim();
 
@@ -66,7 +62,7 @@ export class SaveVideoDetailsComponent {
 		event.chipInput!.clear();
 	}
 
-	remove(value: String): void {
+	remove(value: string): void {
 		const index = this.tags.indexOf(value);
 
 		if (index >= 0) {
@@ -89,5 +85,25 @@ export class SaveVideoDetailsComponent {
 				// show an upload success notification.
 				this.matSnackBar.open("Thumbnail Upload Successful", "OK");
 			})
+	}
+	
+	
+	saveVideo() {
+		// call the video service to make http call to backend 
+	  const videoMetaData: VideoDto = {
+      "id": this.videoId,
+      "title": this.saveVideoDetailsForm.get('title')?.value,
+      "description": this.saveVideoDetailsForm.get('description')?.value,
+      "tags": this.tags,
+      "videoStatus": this.saveVideoDetailsForm.get('videoStatus')?.value,
+      "videoUrl": this.videoUrl,
+      "thumbnailUrl": this.thumbnailUrl,
+      "likeCount": 0,
+      "dislikeCount": 0,
+      "viewCount": 0
+    }
+    this.videoService.saveVideo(videoMetaData).subscribe(data => {
+      this.matSnackBar.open("Video Metadata Updated successfully", "OK");
+    })
 	}
 }
