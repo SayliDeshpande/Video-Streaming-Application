@@ -1,0 +1,3 @@
+OpenID Connect Client with Spring Security : https://curity.io/resources/learn/oidc-spring-boot/
+
+Spring Boot API: Authorization : https://auth0.com/docs/quickstart/backend/java-spring-security5
